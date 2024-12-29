@@ -90,3 +90,7 @@ Temporary Items
 *.vdi
 *.iso
 *.7z
+*.fd
+
+!**/edk2-aarch64-code.fd
+!**/edk2-x86_64-code.fd
