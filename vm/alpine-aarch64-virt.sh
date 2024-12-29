@@ -44,7 +44,7 @@ DISK_NAME="${FILENAME%.sh}.vdi"
 # ISO_FILE dapat berisi URL atau nama file yang ada di direktori resources
 # Jika nama file URL dan nama file di direktori resources sama akan digunakan
 # file yang ada di direktori resources
-ISO_FILE="alpine-virt-3.21.0-aarch64.iso"
+ISO_FILE="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/aarch64/alpine-virt-3.21.0-aarch64.iso"
 
 # Nama yang akan ditampilkan di title bar window VM
 # Diambil dari nama script tanpa ekstensi .sh
@@ -53,7 +53,7 @@ TITLEBAR="${FILENAME%.sh}"
 # Mode default yang digunakan saat menjalankan VM
 # 'base': Mode dengan GUI standard
 # Alternatif: 'nographic' untuk mode tanpa GUI, 'core' untuk mode minimal
-DEFAULT_MODE="base"
+DEFAULT_MODE="nographic"
 
 # Argumen tambahan untuk QEMU
 # Dapat diisi sesuai kebutuhan, misal: untuk networking atau device tambahan
@@ -76,9 +76,9 @@ is_url() {
 # Fungsi untuk mengunduh ISO
 download_iso() {
     local url="$1"
-    local output="${2:-$(basename "$url")}"
+    local output="$2"
     
-    if curl -L "$url" -o "$output"; then
+    if curl -# -L "$url" -o "$output"; then
         echo "Unduhan berhasil: $output"
         return 0
     else
@@ -159,15 +159,14 @@ main() {
         echo "Mencari iso file."
         
         if is_url "$ISO_FILE" && [ ! -f "$iso_path" ]; then
-            download_iso "$ISO_FILE" "${RESOURCES_PATH}/${ISO_FILE}"
+            download_iso "$ISO_FILE" "${iso_path}"
         fi
 
         if [ ! -f "$iso_path" ]; then
             echo "File ISO ${RESOURCES_PATH}/${ISO_FILE} tidak ditemukan."
             exit 1
         fi
-        
-        run "$1" -cdrom "$iso_path"
+        run -cdrom ${iso_path}
     else
         run "$@"
     fi
