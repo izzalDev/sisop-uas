@@ -44,7 +44,7 @@ DISK_NAME="${FILENAME%.sh}.vdi"
 # ISO_FILE dapat berisi URL atau nama file yang ada di direktori resources
 # Jika nama file URL dan nama file di direktori resources sama akan digunakan
 # file yang ada di direktori resources
-ISO_FILE="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/aarch64/alpine-virt-3.21.0-aarch64.iso"
+ISO_FILE="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-virt-3.21.0-aarch64.iso"
 
 # Nama yang akan ditampilkan di title bar window VM
 # Diambil dari nama script tanpa ekstensi .sh
@@ -92,20 +92,37 @@ create_disk() {
     qemu-img create -f vdi "$1" "$2"
 }
 
+# Fungsi untuk bundling script dan resources
+pack() {
+    mkdir -p packed
+    7zz a -mx9 packed/${FILENAME%.sh}.7z \
+    ${RESOURCES_PATH}/edk2-${ARCH}-code.fd \
+    ${RESOURCES_PATH}/${FILENAME%.sh}.fd \
+    ${RESOURCES_PATH}/${DISK_NAME} \
+    ${RESOURCES_PATH}/$(basename "$ISO_FILE")
+
+}
+
 # Fungsi inti QEMU
 core() {
-    local machine_type
-    [ "$ARCH" = "aarch64" ] && machine_type="virt" || machine_type="q35"
+    # Konfigurasi machine type dan firmware berdasarkan arsitektur
+    local machine_type accel_option
+    if [ "$ARCH" = "aarch64" ]; then
+        machine_type="virt"
+        # Aktifkan akselerasi HVF untuk macOS pada ARM
+        [ "$(uname)" = "Darwin" ] && accel_option="-accel hvf -cpu host"
+    else
+        machine_type="q35"
+    fi
     
-    local accel_option
-    [ "$(uname)" = "Darwin" ] && accel_option="-accel hvf -cpu host" || accel_option=""
-    
+    # Jalankan QEMU dengan konfigurasi yang telah ditentukan
     qemu-system-${ARCH} \
         -name "$TITLEBAR" \
         -machine "$machine_type" \
         -smp "$CPU_CORES" \
         -m "$RAM_SIZE" \
-        -bios "${RESOURCES_PATH}/QEMU_EFI_STABLE.fd" \
+        -drive if=pflash,format=raw,file=${RESOURCES_PATH}/edk2-${ARCH}-code.fd,readonly=on \
+        -drive if=pflash,format=raw,file=${RESOURCES_PATH}/${FILENAME%.sh}.fd \
         -drive "file=${RESOURCES_PATH}/${DISK_NAME},format=vdi,if=virtio" \
         -drive "file=fat:rw:${CURRENT_PATH}/shared,media=disk,format=raw" \
         ${accel_option} ${ARGS} "$@"
@@ -137,6 +154,12 @@ run() {
         core)
             core "${@:2}"
             ;;
+        base)
+            base "${@:2}"
+            ;;
+        pack)
+            pack
+            ;;
         *)
             $DEFAULT_MODE "$@"
             ;;
@@ -150,6 +173,10 @@ main() {
         echo "Disk image ${RESOURCES_PATH}/${DISK_NAME} tidak ditemukan"
         echo "Membuat disk image ..."
         create_disk "${RESOURCES_PATH}/${DISK_NAME}" "${DISK_SIZE}"
+    fi
+
+    if [ ! -f "${RESOURCES_PATH}/${FILENAME%.sh}.fd" ]; then
+        cp "${RESOURCES_PATH}/edk2-$ARCH-code.fd" "${RESOURCES_PATH}/${FILENAME%.sh}.fd"
     fi
 
     # Jika disk kosong, siapkan dengan ISO
@@ -166,7 +193,7 @@ main() {
             echo "File ISO ${RESOURCES_PATH}/${ISO_FILE} tidak ditemukan."
             exit 1
         fi
-        run -cdrom ${iso_path}
+        run "$@" -cdrom ${iso_path}
     else
         run "$@"
     fi
