@@ -1,0 +1,70 @@
+#!/bin/bash
+
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
+SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
+VM_NAME="${SCRIPT_NAME%.sh}"
+ISO_URL="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/aarch64/alpine-virt-3.21.0-aarch64.iso"
+
+create_disk() {
+    qemu-img create -f vdi "$1" 1G
+}
+
+download_iso() {
+    if ! curl -# -L "$1" -o "$2" --fail; then
+        echo "Error: Failed to download ISO from $1" >&2
+        exit 1
+    fi
+}
+
+run_vm() {
+    local accel=""
+    [ "$(uname)" = "Darwin" ] && accel="-accel hvf -cpu host"
+    
+    qemu-system-aarch64 \
+        -name "$VM_NAME" \
+        -machine virt \
+        -smp 2 \
+        -m 1G \
+        -drive if=pflash,format=raw,file=${SCRIPT_DIR}/resources/edk2-aarch64-code.fd,readonly=on \
+        -drive if=pflash,format=raw,file=${SCRIPT_DIR}/resources/${VM_NAME}.fd \
+        -drive "file=${SCRIPT_DIR}/resources/${VM_NAME}.vdi,format=vdi,if=virtio" \
+        -drive "file=fat:rw:${SCRIPT_DIR}/shared,media=disk,format=raw" \
+        ${accel} "$@"
+}
+
+nographic() {
+    run_vm -nographic "$@"
+}
+
+base() {
+    run_vm \
+        -device virtio-gpu-pci \
+        -display default,show-cursor=on \
+        -device qemu-xhci \
+        -device usb-kbd \
+        -device usb-tablet \
+        -device virtio-sound,streams=1 \
+        "$@"
+}
+
+main() {
+    mkdir -p ${SCRIPT_DIR}/resources
+    
+    [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.vdi" ] && \
+        create_disk "${SCRIPT_DIR}/resources/${VM_NAME}.vdi"
+
+    [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.fd" ] && \
+        cp "${SCRIPT_DIR}/resources/edk2-aarch64-code.fd" "${SCRIPT_DIR}/resources/${VM_NAME}.fd"
+
+    if [ ! -f "${SCRIPT_DIR}/resources/$(basename ISO_URL)" ]; then
+        download_iso "${ISO_URL}" \
+            "${SCRIPT_DIR}/resources/$(basename ISO_URL)"
+        eval "${1:-nographic} -cdrom ${SCRIPT_DIR}/resources/$(basename ISO_URL)"
+    else
+        eval "${1:-nographic} -cdrom ${SCRIPT_DIR}/resources/$(basename ISO_URL)"
+    fi
+}
+
+main "$@"
