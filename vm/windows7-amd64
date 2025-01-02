@@ -8,14 +8,16 @@ SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 VM_NAME="${SCRIPT_NAME%.sh}"
 ISO_URL="https://archive.org/download/Windows7-iso/win7_64_bit.iso"
+# VIRTIO_URL="https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.266-1/virtio-win-0.1.266.iso"
+VIRTIO_URL="https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.173-9/virtio-win-0.1.173.iso"
 
 create_disk() {
-    qemu-img create -f vdi "$1" 10G
+    qemu-img create -f vdi "$1" 20G
 }
 
-download_iso() {
+download() {
     if ! curl -# -L "$1" -o "$2" --fail; then
-        echo "Error: Failed to download ISO from $1" >&2
+        echo "Error: Failed to download $(basename $1) from $1" >&2
         exit 1
     fi
 }
@@ -26,34 +28,24 @@ clean() {
     echo "Clean completed."
 }
 
-run_vm() {    
+run_vm() {
+    clear    
     qemu-system-x86_64 \
         -name "$VM_NAME" \
         -machine q35 \
         -smp 4 \
-        -m 1G \
-        -drive "file=${SCRIPT_DIR}/resources/${VM_NAME}.vdi,format=vdi,if=virtio" \
-        -drive "file=fat:rw:${SCRIPT_DIR}/shared,media=disk,format=raw" \
-        -cdrom ${SCRIPT_DIR}/resources/$(basename $ISO_URL) \
-        -boot d \
+        -m 2G \
+        -drive "file=${SCRIPT_DIR}/resources/${VM_NAME}.vdi,format=vdi,if=none,id=disk1" \
+        -device virtio-blk-pci,drive=disk1,bootindex=1 \
         -nic vmnet-shared \
-        -nic vmnet-bridged,ifname=en0 "$@"
-}
-
-nographic() {
-    run_vm -nographic "$@"
-}
-
-base() {
-    run_vm \
+        -nic vmnet-bridged,ifname=en0 \
+        -monitor stdio \
         -device virtio-gpu-pci \
         -display default,show-cursor=on \
-        -device qemu-xhci \
+        -usb \
         -device usb-kbd \
         -device usb-tablet \
-        -device virtio-sound,streams=1 \
-        -daemonize \
-        "$@"
+        -device intel-hda "$@"
 }
 
 main() {
@@ -62,24 +54,30 @@ main() {
     [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.vdi" ] && \
         create_disk "${SCRIPT_DIR}/resources/${VM_NAME}.vdi"
 
-    if [ ! -f "${SCRIPT_DIR}/resources/$(basename $ISO_URL)" ]; then
-        download_iso "${ISO_URL}" \
-            "${SCRIPT_DIR}/resources/$(basename $ISO_URL)"
-    fi
-
     case "$1" in
         clean)
             clean
             ;;
-        nographic)
-            nographic ${@:2}
-            ;;
-        base)
-            base ${@:2}
+        install)
+            if [ ! -f "${SCRIPT_DIR}/resources/$(basename $ISO_URL)" ]; then
+                download "${ISO_URL}" \
+                    "${SCRIPT_DIR}/resources/$(basename $ISO_URL)"
+            fi
+
+            if [ ! -f "${SCRIPT_DIR}/resources/$(basename $VIRTIO_URL)" ]; then
+                download "${VIRTIO_URL}" \
+                    "${SCRIPT_DIR}/resources/$(basename $VIRTIO_URL)"
+            fi
+
+            run_vm \
+            -drive "file=${SCRIPT_DIR}/resources/$(basename $VIRTIO_URL),media=cdrom,format=raw" \
+            -cdrom "${SCRIPT_DIR}/resources/$(basename $ISO_URL)" \
+            -drive "file=fat:rw:${SCRIPT_DIR}/shared,media=disk,format=raw" \
+            -boot "once=d" ${@:2}
             ;;
         *)
             # Default case (if no patterns match)
-            base $@
+            run_vm $@
             ;;
     esac
 }
