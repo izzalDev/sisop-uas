@@ -1,0 +1,87 @@
+#!sudo /bin/bash
+
+# set -x
+
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
+SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
+VM_NAME="${SCRIPT_NAME%.sh}"
+ISO_URL="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-virt-3.21.0-x86_64.iso"
+
+create_disk() {
+    qemu-img create -f vdi "$1" 1G
+}
+
+download_iso() {
+    if ! curl -# -L "$1" -o "$2" --fail; then
+        echo "Error: Failed to download ISO from $1" >&2
+        exit 1
+    fi
+}
+
+clean() {
+    echo "Cleaning up resources..."
+    rm -f "${SCRIPT_DIR}/resources/${VM_NAME}.vdi"
+    echo "Clean completed."
+}
+
+run_vm() {    
+    qemu-system-x86_64 \
+        -name "$VM_NAME" \
+        -machine q35 \
+        -smp 2 \
+        -m 1G \
+        -drive if=pflash,format=raw,file=${SCRIPT_DIR}/resources/edk2-x86_64-code.fd,readonly=on \
+        -drive "file=${SCRIPT_DIR}/resources/${VM_NAME}.vdi,format=vdi,if=virtio" \
+        -drive "file=fat:rw:${SCRIPT_DIR}/shared,media=disk,format=raw" \
+        -cdrom ${SCRIPT_DIR}/resources/$(basename $ISO_URL) \
+        -nic vmnet-shared \
+        -nic vmnet-bridged,ifname=en0 "$@"
+}
+
+nographic() {
+    run_vm -nographic "$@"
+}
+
+base() {
+    run_vm \
+        -device virtio-gpu-pci \
+        -display default,show-cursor=on \
+        -device qemu-xhci \
+        -device usb-kbd \
+        -device usb-tablet \
+        -device virtio-sound,streams=1 \
+        -daemonize \
+        "$@"
+}
+
+main() {
+    mkdir -p ${SCRIPT_DIR}/resources
+    
+    [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.vdi" ] && \
+        create_disk "${SCRIPT_DIR}/resources/${VM_NAME}.vdi"
+
+    if [ ! -f "${SCRIPT_DIR}/resources/$(basename $ISO_URL)" ]; then
+        download_iso "${ISO_URL}" \
+            "${SCRIPT_DIR}/resources/$(basename $ISO_URL)"
+    fi
+
+    case "$1" in
+        clean)
+            clean
+            ;;
+        nographic)
+            nographic ${@:2}
+            ;;
+        base)
+            base ${@:2}
+            ;;
+        *)
+            # Default case (if no patterns match)
+            base $@
+            ;;
+    esac
+}
+
+main "$@"
