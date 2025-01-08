@@ -1,6 +1,5 @@
 #!sudo /bin/bash
-
-# set -x
+# Skrip untuk mengelola VM berbasis QEMU untuk Alpine Linux (aarch64)
 
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
@@ -9,86 +8,90 @@ SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 VM_NAME="${SCRIPT_NAME%.sh}"
 ISO_URL="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/aarch64/alpine-virt-3.21.0-aarch64.iso"
 
+# Fungsi untuk membuat disk virtual
 create_disk() {
     qemu-img create -f vdi "$1" 1G
 }
 
+# Fungsi untuk mengunduh file ISO
 download_iso() {
-    if ! curl -# -L "$1" -o "$2" --fail; then
-        echo "Error: Failed to download ISO from $1" >&2
+    local url="$1"
+    local output="$2"
+    if ! curl -# -L "$url" -o "$output" --fail; then
+        echo "Error: Gagal mengunduh ISO dari $url" >&2
         exit 1
     fi
 }
 
+# Fungsi untuk membersihkan sumber daya
 clean() {
-    echo "Cleaning up resources..."
+    echo "Membersihkan sumber daya..."
     rm -f "${SCRIPT_DIR}/resources/${VM_NAME}.vdi"
     rm -f "${SCRIPT_DIR}/resources/${VM_NAME}.fd"
-    echo "Clean completed."
+    echo "Pembersihan selesai."
 }
 
+# Fungsi untuk menjalankan VM
 run_vm() {
     local accel=""
-    [ "$(uname)" = "Darwin" ] && accel="-accel hvf -cpu host"
-    
+    if [ "$(uname)" = "Darwin" ]; then
+        accel="-accel hvf -cpu host"
+    fi
+
+    clear
     qemu-system-aarch64 \
         -name "$VM_NAME" \
         -machine virt \
         -smp 2 \
         -m 1G \
-        -drive if=pflash,format=raw,file=${SCRIPT_DIR}/resources/edk2-aarch64-code.fd,readonly=on \
-        -drive if=pflash,format=raw,file=${SCRIPT_DIR}/resources/${VM_NAME}.fd \
+        -drive if=pflash,format=raw,file="${SCRIPT_DIR}/resources/edk2-aarch64-code.fd",readonly=on \
+        -drive if=pflash,format=raw,file="${SCRIPT_DIR}/resources/${VM_NAME}.fd" \
         -drive "file=${SCRIPT_DIR}/resources/${VM_NAME}.vdi,format=vdi,if=virtio" \
         -drive "file=fat:rw:${SCRIPT_DIR}/shared,media=disk,format=raw" \
-        -cdrom ${SCRIPT_DIR}/resources/$(basename $ISO_URL) \
         -nic vmnet-shared \
         -nic vmnet-bridged,ifname=en0 \
-        ${accel} "$@"
-}
-
-nographic() {
-    run_vm -nographic "$@"
-}
-
-base() {
-    run_vm \
         -device virtio-gpu-pci \
-        -display default,show-cursor=on \
         -device qemu-xhci \
         -device usb-kbd \
         -device usb-tablet \
-        -device virtio-sound,streams=1 \
-        -daemonize \
-        "$@"
+        -device virtio-sound,streams=1 $accel "$@"
 }
 
-main() {
-    mkdir -p ${SCRIPT_DIR}/resources
-    
-    [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.vdi" ] && \
+# Fungsi untuk menginstal VM menggunakan ISO
+install() {
+    mkdir -p "${SCRIPT_DIR}/resources"
+
+    # Buat disk virtual jika belum ada
+    if [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.vdi" ]; then
         create_disk "${SCRIPT_DIR}/resources/${VM_NAME}.vdi"
-
-    [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.fd" ] && \
-        cp "${SCRIPT_DIR}/resources/edk2-aarch64-code.fd" "${SCRIPT_DIR}/resources/${VM_NAME}.fd"
-
-    if [ ! -f "${SCRIPT_DIR}/resources/$(basename $ISO_URL)" ]; then
-        download_iso "${ISO_URL}" \
-            "${SCRIPT_DIR}/resources/$(basename $ISO_URL)"
     fi
 
+    # Salin firmware jika belum ada
+    if [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.fd" ]; then
+        cp "${SCRIPT_DIR}/resources/edk2-aarch64-code.fd" "${SCRIPT_DIR}/resources/${VM_NAME}.fd"
+    fi
+
+    # Download iso file jika belum ada
+    local iso_path="${SCRIPT_DIR}/resources/$(basename $ISO_URL)"
+    if [ ! -f "$iso_path" ]; then
+        download_iso "$ISO_URL" "$iso_path"
+    fi
+
+    run_vm -cdrom "$iso_path" "$@"
+}
+
+# Fungsi utama
+main() {
+    # Pilih aksi berdasarkan argumen pertama
     case "$1" in
         clean)
             clean
             ;;
-        nographic)
-            nographic ${@:2}
-            ;;
-        base)
-            base ${@:2}
+        install)
+            install "${@:2}"
             ;;
         *)
-            # Default case (if no patterns match)
-            base $@
+            run_vm "$@"
             ;;
     esac
 }

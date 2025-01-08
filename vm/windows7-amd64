@@ -33,7 +33,7 @@ run_vm() {
     qemu-system-x86_64 \
         -name "$VM_NAME" \
         -machine q35 \
-        -smp 4 \
+        -smp 8 \
         -m 2G \
         -drive "file=${SCRIPT_DIR}/resources/${VM_NAME}.vdi,format=vdi,if=none,id=disk1" \
         -device virtio-blk-pci,drive=disk1,bootindex=1 \
