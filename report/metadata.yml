@@ -1,0 +1,23 @@
+---
+title: LAPORAN PROYEK AKHIR
+subtitle: SISTEM OPERASI A11.4322
+author:
+  - name: Rizal Fadlullah
+    nim: A11.2019.12070
+  - name: Muhammad Ramadhan Badali
+    nim: A11.2023.15450
+server_ip: 192.168.22.71/24
+client_ip: 192.168.22.51/24
+toc: true
+toc-own-page: true
+toc-title: Daftar Isi
+titlepage: true
+titlepage-logo: report/assets/images/logo-udinus.png
+footer-left: Proyek Akhir Sistem Operasi A11.4322
+header-includes:
+  - \usepackage{caption}
+  - \captionsetup[figure]{name=Gambar, justification=centering}
+  - \renewcommand{\contentsname}{Whatever}
+  - \newcommand{\serverIp}{192.168.22.71}
+---
+

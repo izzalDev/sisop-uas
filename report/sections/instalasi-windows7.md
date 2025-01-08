@@ -14,8 +14,6 @@ Sebelum memulai instalasi Windows 7, pastikan Anda memiliki:
    - Prosesor: 1 GHz atau lebih.
    - RAM: 1 GB (32-bit) atau 2 GB (64-bit).
    - Penyimpanan: 16 GB (32-bit) atau 20 GB (64-bit).
-
----
 .
 ## Instalasi di Virtual Machine (VM)
 
@@ -33,8 +31,6 @@ Sebelum memulai instalasi Windows 7, pastikan Anda memiliki:
 4. Tambahkan ISO Windows 7 sebagai optical drive:
    - Di VirtualBox: Buka **Settings** > **Storage** > Tambahkan ISO pada
      **Controller: IDE**.
-
----
 
 ### 2. Jalankan Virtual Machine
 
@@ -56,14 +52,10 @@ Langkah berikut berlaku baik untuk instalasi fisik maupun di VM.
 2. Klik **Next**.
 3. Klik **Install Now** untuk memulai instalasi.
 
----
-
 ### 2. Terima Perjanjian Lisensi
 
 1. Centang opsi **I accept the license terms**.
 2. Klik **Next**.
-
----
 
 ### 3. Pilih Jenis Instalasi
 
@@ -73,16 +65,10 @@ Langkah berikut berlaku baik untuk instalasi fisik maupun di VM.
    - Untuk sistem fisik, pilih partisi tempat Windows akan diinstal.
 3. Klik **Next** untuk melanjutkan.
 
-> ⚠️ **Peringatan**: Memformat partisi akan menghapus semua data di dalamnya.
-
----
-
 ### 4. Tunggu Proses Instalasi
 
 1. Windows akan menyalin file, menginstal fitur, dan memperbarui file sistem.
 2. Setelah selesai, komputer atau VM akan restart secara otomatis.
-
----
 
 ### 5. Konfigurasi Awal
 
@@ -96,14 +82,10 @@ Langkah berikut berlaku baik untuk instalasi fisik maupun di VM.
    - **Work Network**: Untuk jaringan kantor.
    - **Public Network**: Untuk jaringan umum.
 
----
-
 ### 6. Instalasi Selesai
 
 Setelah konfigurasi selesai, Windows 7 akan memuat ke desktop, dan Anda siap
 menggunakannya.
-
----
 
 ## Tips Tambahan untuk Virtual Machine
 
@@ -116,8 +98,6 @@ menggunakannya.
      rollback jika terjadi masalah.
 3. **Kinerja VM**:
    - Atur jumlah CPU dan memori yang cukup untuk meningkatkan kinerja.
-
----
 
 ## Troubleshooting
 

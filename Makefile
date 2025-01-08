@@ -23,6 +23,9 @@ $(OUTPUT): $(METADATA) $(SECTIONS) $(BIBLIOGRAPHY) $(TEMPLATE)
 		--template=$(TEMPLATE) \
 		--bibliography=$(BIBLIOGRAPHY) \
 		--output=$(OUTPUT) \
+		--number-sections \
+		--listings \
+		--embed-resources \
 		$(SECTIONS)
 
 # Membersihkan file sementara
