@@ -2,121 +2,190 @@
 
 ## Instalasi Sistem Operasi pada Server
 
-Untuk memulai instalasi sistem operasi pada server, Anda perlu memastikan bahwa
-VM server yang telah Anda siapkan dapat di-boot menggunakan file ISO yang
-sesuai. Dalam hal ini, kita menggunakan Alpine Linux sebagai sistem operasi
-untuk server.
+Sebelum memulai instalasi sistem operasi pada server, pastikan VM (Virtual
+Machine) server telah disiapkan dan dapat melakukan boot menggunakan file ISO
+yang sesuai. Pada panduan ini, kita akan menggunakan Alpine Linux sebagai sistem
+operasi server. Alpine Linux dipilih karena ringan, aman, dan sangat cocok untuk
+server.
 
-1. Menjalankan VM untuk Instalasi Pastikan bahwa skrip `alpine-aarch64-virt`
-   sudah dapat dijalankan dengan memberikan izin eksekusi menggunakan perintah:
+1. Berikan izin eksekusi pada skrip instalasi dengan menjalankan perintah
+   berikut pada terminal. Perintah ini memungkinkan skrip dapat dieksekusi oleh
+   sistem:
 
    ```bash
    chmod +x alpine-aarch64-virt
    ```
 
-   Sesuaikan nama skrip `alpine-aarch64-virt` berdasarkan skrip yang dibuat
-   sebelumnya.
+   Pastikan untuk menyesuaikan nama skrip jika Anda menggunakan nama file yang
+   berbeda.
 
-   ![Ijin eksekusi ke skrip server](report/assets/images/server-script-permission.png)
-
-2. Menjalankan Mesin Virtual (VM) Jalankan mesin virtual dengan perintah berikut
-   untuk memulai instalasi:
+2. Mulai proses instalasi dengan menjalankan skrip menggunakan perintah:
 
    ```bash
    ./alpine-aarch-virt install
    ```
 
-   Skrip ini akan mengunduh file ISO Alpine Linux jika belum ada, membuat disk
-   virtual jika perlu, dan kemudian memulai proses instalasi.
+   Skrip ini akan melakukan beberapa tugas otomatis termasuk mengunduh file ISO
+   Alpine Linux jika belum tersedia di sistem Anda, membuat disk virtual baru
+   jika diperlukan, dan memulai proses instalasi dasar.
 
-   ![Menginstall Operating Sistem](report/assets/images/menginstall-os-pada-vm.png)
+   ![Tampilan awal ketika skrip instalasi mulai dijalankan, menunjukkan persiapan sistem untuk instalasi Alpine Linux](../assets/images/capture.png)
 
-3. Tunggu skrip mengunduh file ISO Alpine Linux jika belum ada, membuat disk
-   virtual, dan melakukan booting dengan ISO Alpine Linux
+3. Sistem akan memulai proses persiapan instalasi. Pada tahap ini, skrip akan
+   mengunduh file ISO Alpine Linux jika belum tersedia dan menyiapkan disk
+   virtual untuk instalasi.
 
-   ![Proses peyiapkan kebutuhan untuk menjalankan skrip](report/assets/images/proses-penyiapan-kebutuhan.png)
+   ![Proses pengunduhan ISO Alpine Linux dan penyiapan disk virtual sedang berlangsung](../assets/images/capture%201.png)
 
-4. Jika proses booting berhasil akan muncul tampilan sebagai berikut pada
-   terminal emulator.
+4. Setelah proses persiapan selesai, sistem akan melakukan booting menggunakan
+   ISO Alpine Linux. Tampilan ini mengindikasikan bahwa proses boot telah
+   berhasil dan sistem siap untuk instalasi.
 
-   ![Booting ke ISO Alpine Linux](report/assets/images/booting-berhasil.png)
+   ![Sistem berhasil melakukan boot menggunakan ISO Alpine Linux dan menampilkan prompt login awal](../assets/images/capture%202.png)
 
-5. Login dengan username `root`
+5. Pada prompt login yang muncul, masukkan username `root`. Pada tahap ini,
+   belum diperlukan password karena sistem masih dalam mode live ISO.
 
-   ![Login sebagai root](report/assets/images/input-user-root.png)
+   ![Prompt login Alpine Linux - masukkan root sebagai username untuk melanjutkan instalasi](../assets/images/capture%203.png)
 
-6. Jika berhasil akan menampilkan teks sebagai berikut di terminal
+6. Setelah berhasil login, terminal akan menampilkan informasi sistem Alpine
+   Linux. Ini menandakan bahwa Anda telah berhasil masuk ke sistem live dan siap
+   untuk memulai instalasi.
 
-   ![Login sebagai root](report/assets/images/login-success.png)
+   ![Terminal Alpine Linux setelah berhasil login sebagai root, menunjukkan sistem siap untuk konfigurasi](../assets/images/capture%204.png)
 
-7. Jalankan perintah `setup-alpine`
+7. Mulai proses instalasi dengan mengetikkan perintah `setup-alpine`. Perintah
+   ini akan memulai wizard instalasi interaktif Alpine Linux yang akan memandu
+   Anda melalui proses konfigurasi sistem.
 
-   ![Menjalankan perintah `setup-alpine`](report/assets/images/perintah-setup-alpine.png)
+   ![Menjalankan setup-alpine untuk memulai proses instalasi dan konfigurasi sistem](../assets/images/capture%204.png)
 
-8. Masukkan hostname misalkan `sisop-server`
+8. Masukkan hostname untuk server Anda, misalnya `sisop-server`. Hostname ini
+   akan digunakan sebagai identifikasi server dalam jaringan. Pilih nama yang
+   mudah diingat dan sesuai dengan fungsi server.
 
-   ![Memasukkan hostname](report/assets/images/masukkan-hostname.png)
+   ![Mengatur hostname server - pilih nama yang sesuai dengan fungsi dan mudah diidentifikasi](../assets/images/capture%205.png)
 
-9. Tekan enter untuk mengkonfigurasi interface eth0 (jaringan nat/shared)
+9. Sistem akan meminta konfigurasi untuk interface eth0 (jaringan NAT/shared).
+   Tekan Enter untuk melanjutkan dengan konfigurasi default. Interface ini
+   biasanya digunakan untuk koneksi internet.
 
-   ![Konfigurasi jaringan nat/shared](report/assets/images/konfigurasi-eth0.png)
+   ![Konfigurasi interface jaringan pertama eth0 untuk koneksi NAT/shared](../assets/images/capture%206.png)
 
-10. Tekan enter untuk menggunakan ip dari dhcp server pada eth0 (jaringan
-    nat/shared)
+10. Untuk konfigurasi IP pada eth0, tekan Enter untuk menggunakan DHCP. DHCP
+    akan secara otomatis mengatur alamat IP, gateway, dan DNS server untuk
+    interface ini.
 
-    ![Set dhcp pada eth0](report/assets/images/jaringan-eth0-dhcp.png)
+    ![Mengatur DHCP untuk eth0 - memungkinkan pemberian IP otomatis dari router](../assets/images/capture%208.png)
 
-11. Tekan enter untuk mengkonfigurasi interface eth0 (jaringan bridged)
+11. Selanjutnya adalah konfigurasi interface eth1 (jaringan bridged). Interface
+    ini biasanya digunakan untuk koneksi ke jaringan lokal.
 
-    ![Konfigurasi jaringan bridged](report/assets/images/konfigurasi-eth1.png)
+    ![Konfigurasi interface jaringan kedua eth1 untuk koneksi bridged ke jaringan lokal](../assets/images/capture%209.png)
 
-12. Masukkan ip \serverIp{} untuk eth1(jaringan bridged)
+12. Untuk eth1, ketik `none` karena konfigurasi detail akan dilakukan pada tahap
+    selanjutnya setelah instalasi selesai.
 
-    ![Konfigurasi ip pada eth1](report/assets/images/ip-server.png)
+    ![Melewati konfigurasi IP untuk eth1 - akan dikonfigurasi manual setelah instalasi](../assets/images/capture%2010.png)
 
-13. Tekan enter jika tidak menggunakan gateway
+13. Ketika ditanya untuk membuka file konfigurasi, tekan Enter untuk melanjutkan
+    tanpa modifikasi tambahan.
 
-    ![Konfigurasi ip gateway pada eth1](report/assets/images/eth1-gateway.png)
+    ![Mengkonfirmasi pengaturan jaringan tanpa modifikasi tambahan](../assets/images/capture%2011.png)
 
-14. Masukkan `n` jika tidak ingin membuka file konfigurasi
+14. Masukkan password untuk akun root. Pilih password yang kuat dengan kombinasi
+    huruf, angka, dan karakter khusus. Password ini sangat penting untuk
+    keamanan server Anda.
 
-    ![Konfirmasi konfigurasi ip](report/assets/images/confirm-interface.png)
+    ![Mengatur password untuk akun root - pastikan menggunakan password yang kuat](../assets/images/capture%2012.png)
 
-15. Masukkan root password
+15. Ketik ulang password root untuk konfirmasi. Pastikan tidak ada kesalahan
+    dalam pengetikan password.
 
-    ![input root password](report/assets/images/new-password.png)
+    ![Konfirmasi ulang password root untuk memastikan tidak ada kesalahan pengetikan](../assets/images/capture%2013.png)
 
-16. Masukkan `Asia/Jakarta` untuk mengkonfigurasi zona watku yang digunakan oleh
-    operating sistem.
+16. Masukkan `Asia/Jakarta` untuk mengatur zona waktu. Pengaturan zona waktu
+    yang tepat penting untuk log sistem dan penjadwalan tugas.
 
-    ![konfigurasi zona waktu](report/assets/images/set-timezone.png)
+    ![Mengatur zona waktu server ke Asia/Jakarta untuk akurasi waktu sistem](../assets/images/capture%2014.png)
 
-17. Tekan enter jika tidak ingin menggunakan proxy.
+17. Untuk pengaturan proxy, tekan Enter jika Anda tidak menggunakan proxy. Jika
+    server Anda berada di belakang proxy, masukkan detail konfigurasi proxy di
+    sini.
 
-    ![konfigurasi proxy](report/assets/images/proxy.png)
+    ![Konfigurasi proxy server - lewati jika tidak menggunakan proxy](../assets/images/capture%2015.png)
 
-18. Masukkan NTP server yang ingin digunakan untuk sinkronisasi waktu. disini
-    kita menggunakan none karena ingin menggunakan waktu dari host os.
+18. Untuk server NTP, masukkan `none` karena kita akan menggunakan waktu dari
+    host OS. NTP biasanya digunakan untuk sinkronisasi waktu dengan server waktu
+    internet.
 
-    ![set ntp server](report/assets/images/set-ntp.png)
+    ![Melewati konfigurasi NTP server - menggunakan waktu dari sistem host](../assets/images/capture%2016.png)
 
-19. Tekan enter jika ingin menggukan default setting untuk mirror dari pakage
-    manager.
+19. Tekan Enter untuk menggunakan mirror repository default. Mirror ini
+    digunakan untuk mengunduh paket dan pembaruan sistem.
 
-    ![set apk mirror](report/assets/images/apk-setup.png)
+    ![Menggunakan mirror repository default untuk package manager APK](../assets/images/capture%2017.png)
 
-18. Tekan enter karena kita akan menambahkan user pada tahap konfigurasi.
+20. Tekan Enter untuk melewati pembuatan user tambahan karena kita akan
+    menambahkannya nanti setelah instalasi selesai.
 
-    ![set ntp server](report/assets/images/user-setup-no.png)
+    ![Melewati pembuatan user tambahan - akan dilakukan setelah instalasi](../assets/images/capture%2018.png)
 
-18. Tekan enter jika ingin menggunakan openssh sebagai ssh server.
+21. Tekan Enter untuk menggunakan OpenSSH sebagai SSH server. OpenSSH adalah
+    pilihan standar dan aman untuk akses remote ke server.
 
-    ![set openssh server](report/assets/images/openssh-server.png)
+    ![Memilih OpenSSH sebagai server SSH default](../assets/images/capture%2019.png)
 
-20. Proses Instalasi Sistem Operasi Setelah VM berjalan, Anda akan diminta untuk
-    mengikuti langkah-langkah instalasi sistem operasi Alpine Linux. Proses ini
-    meliputi pemilihan partisi disk, konfigurasi jaringan, dan pengaturan
-    password untuk root.
+22. Ketik `yes` untuk mengizinkan login root melalui SSH. Meskipun ini tidak
+    disarankan untuk lingkungan produksi, ini berguna untuk tahap awal
+    konfigurasi.
+
+    ![Mengizinkan akses root melalui SSH - pertimbangkan untuk menonaktifkan ini nanti](../assets/images/capture%2020.png)
+
+23. Tekan Enter untuk melewati konfigurasi SSH key. SSH key dapat ditambahkan
+    nanti untuk keamanan tambahan.
+
+    ![Melewati konfigurasi SSH key - dapat ditambahkan nanti untuk keamanan lebih](../assets/images/capture%2021.png)
+
+24. Masukkan nama disk yang sesuai (biasanya `vda` untuk virtual machine).
+    Pastikan Anda memilih disk yang benar karena semua data di disk ini akan
+    dihapus.
+
+    ![Memilih disk untuk instalasi sistem - pastikan memilih disk yang benar](../assets/images/capture%2022.png)
+
+25. Ketik `sys` untuk melakukan instalasi sistem penuh. Mode ini menginstal
+    Alpine Linux sebagai sistem operasi permanen pada disk.
+
+    ![Memilih mode instalasi sys untuk instalasi sistem penuh](../assets/images/capture%2023.png)
+
+26. Ketik `y` untuk mengkonfirmasi format disk. PERHATIAN: Langkah ini akan
+    menghapus semua data pada disk yang dipilih.
+
+    ![Konfirmasi untuk memformat disk - semua data akan dihapus](../assets/images/capture%2024.png)
+
+27. Tunggu proses instalasi selesai. Sistem akan menginstal semua paket yang
+    diperlukan dan mengkonfigurasi sistem dasar.
+
+    ![Proses instalasi sistem sedang berjalan - tunggu hingga selesai](../assets/images/capture%2025.png)
+
+28. Setelah instalasi selesai, ketik `reboot` untuk me-restart sistem. Pastikan
+    untuk melepas media instalasi (ISO) agar sistem boot dari disk yang baru
+    diinstal.
+
+    ![Instalasi selesai dan sistem siap untuk di-reboot](../assets/images/capture%2026.png)
+
+29. Setelah reboot, sistem Alpine Linux Anda siap digunakan. Anda dapat login
+    menggunakan akun root dan password yang telah dikonfigurasi sebelumnya.
+
+**Catatan Penting:**
+
+- Simpan password root dengan aman
+- Setelah instalasi, disarankan untuk:
+  - Membuat user non-root untuk penggunaan sehari-hari
+  - Menonaktifkan akses root SSH untuk keamanan
+  - Mengkonfigurasi firewall
+  - Melakukan update sistem
+  - Mengkonfigurasi backup
 
 ## Konfigurasi Jaringan Server
 

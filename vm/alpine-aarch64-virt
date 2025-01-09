@@ -1,4 +1,4 @@
-#!sudo /bin/bash
+#!/bin/bash
 # Skrip untuk mengelola VM berbasis QEMU untuk Alpine Linux (aarch64)
 
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
@@ -46,15 +46,14 @@ run_vm() {
     fi
 
     clear
-    qemu-system-aarch64 \
+    sudo qemu-system-aarch64 \
         -name "$VM_NAME" \
         -machine virt \
         -smp 2 \
-        -m 1G \
+        -m 512M \
         -drive if=pflash,format=raw,file="$FIRMWARE_CODE",readonly=on \
         -drive if=pflash,format=raw,file="$VM_FIRMWARE" \
         -drive "file=$VM_DISK,format=vdi,if=virtio" \
-        -drive "file=fat:rw:$SHARED_DIR,media=disk,format=raw" \
         -nic vmnet-shared \
         -nic vmnet-bridged,ifname=en0 \
         -nographic $accel "$@"

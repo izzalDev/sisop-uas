@@ -7,9 +7,10 @@ SECTIONS_DIR = $(REPORT_DIR)/sections
 METADATA = $(REPORT_DIR)/metadata.yml
 BIBLIOGRAPHY = $(REPORT_DIR)/references.bib
 TEMPLATE = $(TEMPLATES_DIR)/Eisvogel.tex
+FILTER_DIR = $(REPORT_DIR)/filters
 
 # Daftar file markdown
-SECTIONS = $(wildcard $(SECTIONS_DIR)/*.md)
+SECTIONS = $(filter-out $(SECTIONS_DIR)/_%.md, $(wildcard $(SECTIONS_DIR)/*.md))
 
 # Default target
 all: $(OUTPUT)
@@ -25,7 +26,8 @@ $(OUTPUT): $(METADATA) $(SECTIONS) $(BIBLIOGRAPHY) $(TEMPLATE)
 		--output=$(OUTPUT) \
 		--number-sections \
 		--listings \
-		--embed-resources \
+		--resource-path $(SECTIONS_DIR) \
+		--lua-filter=$(FILTER_DIR)/include-code-files.lua \
 		$(SECTIONS)
 
 # Membersihkan file sementara
@@ -40,4 +42,4 @@ help:
 	@echo "  clean     : Membersihkan file sementara"
 	@echo "  help      : Menampilkan pesan bantuan"
 
-.PHONY: all clean help
+.PHONY: all clean help test

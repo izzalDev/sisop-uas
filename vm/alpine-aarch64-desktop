@@ -1,4 +1,4 @@
-#!sudo /bin/bash
+#!/bin/bash
 # Skrip untuk mengelola VM berbasis QEMU untuk Alpine Linux (aarch64)
 
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
@@ -6,11 +6,18 @@ export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 VM_NAME="${SCRIPT_NAME%.sh}"
-ISO_URL="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/aarch64/alpine-virt-3.21.0-aarch64.iso"
+ISO_URL="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/aarch64/\
+alpine-virt-3.21.0-aarch64.iso"
+RESOURCES_DIR="${SCRIPT_DIR}/resources"
+VM_DISK="${RESOURCES_DIR}/${VM_NAME}.vdi"
+VM_FIRMWARE="${RESOURCES_DIR}/${VM_NAME}.fd"
+SHARED_DIR="${SCRIPT_DIR}/shared"
+FIRMWARE_CODE="${RESOURCES_DIR}/edk2-aarch64-code.fd"
+ISO_PATH="${RESOURCES_DIR}/$(basename $ISO_URL)"
 
 # Fungsi untuk membuat disk virtual
 create_disk() {
-    qemu-img create -f vdi "$1" 1G
+    qemu-img create -f vdi "$1" 2G
 }
 
 # Fungsi untuk mengunduh file ISO
@@ -26,8 +33,8 @@ download_iso() {
 # Fungsi untuk membersihkan sumber daya
 clean() {
     echo "Membersihkan sumber daya..."
-    rm -f "${SCRIPT_DIR}/resources/${VM_NAME}.vdi"
-    rm -f "${SCRIPT_DIR}/resources/${VM_NAME}.fd"
+    rm -f "$VM_DISK"
+    rm -f "$VM_FIRMWARE"
     echo "Pembersihan selesai."
 }
 
@@ -39,15 +46,15 @@ run_vm() {
     fi
 
     clear
-    qemu-system-aarch64 \
+    sudo qemu-system-aarch64 \
         -name "$VM_NAME" \
         -machine virt \
         -smp 2 \
         -m 1G \
-        -drive if=pflash,format=raw,file="${SCRIPT_DIR}/resources/edk2-aarch64-code.fd",readonly=on \
-        -drive if=pflash,format=raw,file="${SCRIPT_DIR}/resources/${VM_NAME}.fd" \
-        -drive "file=${SCRIPT_DIR}/resources/${VM_NAME}.vdi,format=vdi,if=virtio" \
-        -drive "file=fat:rw:${SCRIPT_DIR}/shared,media=disk,format=raw" \
+        -drive if=pflash,format=raw,file="$FIRMWARE_CODE",readonly=on \
+        -drive if=pflash,format=raw,file="$VM_FIRMWARE" \
+        -drive "file=$VM_DISK,format=vdi,if=virtio" \
+        -drive "file=fat:rw:$SHARED_DIR,media=disk,format=raw" \
         -nic vmnet-shared \
         -nic vmnet-bridged,ifname=en0 \
         -device virtio-gpu-pci \
@@ -59,25 +66,24 @@ run_vm() {
 
 # Fungsi untuk menginstal VM menggunakan ISO
 install() {
-    mkdir -p "${SCRIPT_DIR}/resources"
+    mkdir -p "$RESOURCES_DIR"
 
     # Buat disk virtual jika belum ada
-    if [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.vdi" ]; then
-        create_disk "${SCRIPT_DIR}/resources/${VM_NAME}.vdi"
+    if [ ! -f "$VM_DISK" ]; then
+        create_disk "$VM_DISK"
     fi
 
     # Salin firmware jika belum ada
-    if [ ! -f "${SCRIPT_DIR}/resources/${VM_NAME}.fd" ]; then
-        cp "${SCRIPT_DIR}/resources/edk2-aarch64-code.fd" "${SCRIPT_DIR}/resources/${VM_NAME}.fd"
+    if [ ! -f "$VM_FIRMWARE" ]; then
+        cp "$FIRMWARE_CODE" "$VM_FIRMWARE"
     fi
 
     # Download iso file jika belum ada
-    local iso_path="${SCRIPT_DIR}/resources/$(basename $ISO_URL)"
-    if [ ! -f "$iso_path" ]; then
-        download_iso "$ISO_URL" "$iso_path"
+    if [ ! -f "$ISO_PATH" ]; then
+        download_iso "$ISO_URL" "$ISO_PATH"
     fi
 
-    run_vm -cdrom "$iso_path" "$@"
+    run_vm -cdrom "$ISO_PATH" "$@"
 }
 
 # Fungsi utama
