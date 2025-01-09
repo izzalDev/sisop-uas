@@ -5,16 +5,16 @@
 ### Spesifikasi untuk Server:
 
 - **CPU**: Arsitektur **x86_64** atau **aarch64**.
-- **RAM**: Minimal 2 GB.
-- **Storage**: Minimal 8 GB ruang penyimpanan.
+- **RAM**: Minimal 256 GB.
+- **Storage**: Minimal 1 GB ruang penyimpanan.
 - **Peripherals**: Mendukung perangkat keras umum, kecuali untuk beberapa
   perangkat khusus yang memerlukan driver tambahan.
 
 ### Spesifikasi untuk Desktop (Client):
 
 - **CPU**: Arsitektur **x86_64** atau **aarch64**.
-- **RAM**: Minimal 1 GB.
-- **Storage**: Minimal 4 GB ruang penyimpanan.
+- **RAM**: Minimal 512 GB.
+- **Storage**: Minimal 2 GB ruang penyimpanan.
 - **Peripherals**: Mendukung perangkat keras umum, dengan kompatibilitas GPU
   Intel, ATI/AMD, atau Nvidia (beberapa model).
 

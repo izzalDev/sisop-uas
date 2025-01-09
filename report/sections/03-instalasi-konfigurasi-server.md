@@ -187,9 +187,46 @@ server.
   - Melakukan update sistem
   - Mengkonfigurasi backup
 
-## Konfigurasi Jaringan Server
+## Menginstall doas
 
-Setelah instalasi selesai, Anda perlu mengonfigurasi jaringan pada server.
+Setelah Alpine Linux terinstal pada server, langkah selanjutnya adalah
+menginstal doas untuk memberikan hak akses superuser kepada pengguna tertentu
+dengan konfigurasi yang lebih sederhana dibandingkan sudo.
+
+1.  Langkah pertama adalah memastikan bahwa indeks repositori sistem diperbarui
+    untuk memastikan ketersediaan paket terbaru. Jalankan perintah `apk update`
+
+    ![Output terminal saat memperbarui indeks repositori](../assets/images/capture%2033.png)
+
+2.  Setelah repositori diperbarui, instal doas menggunakan perintah
+    `apk add doas`. Perintah ini akan mengunduh dan menginstal paket doas ke
+    dalam sistem Anda. Pastikan proses instalasi berjalan tanpa error.
+
+    ![Output terminal saat menjalankan perintah `apk add doas`](../assets/images/capture%2034.png)
+
+3.  Untuk memastikan bahwa doas telah terinstal dengan benar, jalankan perintah
+    `doas`. Jika instalasi berhasil, terminal akan menampilkan pesan seperti
+    dibawah ini. Ini menunjukkan bahwa aplikasi siap digunakan.
+
+    ![Output terminal saat menjalankan perintah `doas`](../assets/images/capture%2035.png)
+
+4.  Langkah terakhir adalah mengatur izin pengguna untuk menggunakan doas. Di
+    Alpine Linux, konfigurasi doas disimpan dalam file di direktori
+    /etc/doas.d/. Untuk memberikan izin kepada grup pengguna wheel, jalankan
+    perintah berikut:
+
+    ```bash
+    echo 'permit :wheel' > /etc/doas.d/doas.conf
+    ```
+
+    Perintah ini akan membuat (atau menimpa) file konfigurasi bernama doas.conf
+    di direktori /etc/doas.d/. dan menambahkan aturan permit :wheel ke file
+    tersebut, yang memberikan hak akses superuser kepada semua anggota grup
+    wheel.
+
+<!-- ## Konfigurasi Jaringan Server
+
+Setelah instalasi selesai, kita perlu mengonfigurasi jaringan pada server.
 Alpine Linux menggunakan konfigurasi jaringan berbasis ifup dan ifdown untuk
 mengelola interface jaringan.
 
@@ -261,4 +298,4 @@ Konfigurasi Layanan dan Keamanan
    rc-update add php-fpm default
 
 Dengan langkah-langkah tersebut, server Anda akan siap untuk digunakan dan dapat
-meng-host aplikasi yang diperlukan.
+meng-host aplikasi yang diperlukan. -->
