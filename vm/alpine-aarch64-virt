@@ -17,7 +17,7 @@ ISO_PATH="${RESOURCES_DIR}/$(basename $ISO_URL)"
 
 # Fungsi untuk membuat disk virtual
 create_disk() {
-    qemu-img create -f vdi "$1" 1G
+    qemu-img create -f vdi "$1" 5G
 }
 
 # Fungsi untuk mengunduh file ISO
@@ -50,11 +50,11 @@ run_vm() {
         -name "$VM_NAME" \
         -machine virt \
         -smp 2 \
-        -m 512M \
+        -m 1G \
         -drive if=pflash,format=raw,file="$FIRMWARE_CODE",readonly=on \
         -drive if=pflash,format=raw,file="$VM_FIRMWARE" \
         -drive "file=$VM_DISK,format=vdi,if=virtio" \
-        -nic vmnet-shared \
+        -nic user \
         -nic vmnet-bridged,ifname=en0 \
         -nographic $accel "$@"
 }

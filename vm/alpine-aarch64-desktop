@@ -1,8 +1,6 @@
 #!/bin/bash
 # Skrip untuk mengelola VM berbasis QEMU untuk Alpine Linux (aarch64)
 
-export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
-
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 VM_NAME="${SCRIPT_NAME%.sh}"
@@ -54,8 +52,7 @@ run_vm() {
         -drive if=pflash,format=raw,file="$FIRMWARE_CODE",readonly=on \
         -drive if=pflash,format=raw,file="$VM_FIRMWARE" \
         -drive "file=$VM_DISK,format=vdi,if=virtio" \
-        -drive "file=fat:rw:$SHARED_DIR,media=disk,format=raw" \
-        -nic vmnet-shared \
+        -nic user \
         -nic vmnet-bridged,ifname=en0 \
         -device virtio-gpu-pci \
         -device qemu-xhci \

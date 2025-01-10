@@ -1,0 +1,5 @@
+{
+    "explorer.sortOrderLexicographicOptions": "unicode",
+    "editor.rulers": [80],
+    "editor.wordWrapColumn": 80
+}
