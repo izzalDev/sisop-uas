@@ -279,7 +279,7 @@
 
    ![Mengatur run-level dan menjalankan service](<../assets/images/capture 59.png>)
 
-8. Buka http://\serverIP{} browser pada perangkat yang terhubung dijaringan yang
+8. Buka http://\serverIp{} browser pada perangkat yang terhubung dijaringan yang
    sama. Jika berhasil akan menampilkan setup wordpress, klik continue.
 
    ![Tampilan setup wordpress](<../assets/images/capture 61.png>)

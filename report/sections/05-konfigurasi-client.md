@@ -8,7 +8,7 @@ gunakan perintah `alpine-aarch64-desktop` untuk menjalanka virtual machine
 ## Konfigurasi jaringan
 
 1. Sama dengan pada konfigurasi server hanya saja terdapat perbedaan alamat ip,
-   kali ini kita akan menggunakan alamat ip \clientIP{}.
+   kali ini kita akan menggunakan alamat ip \clientIp{}.
 
    ```bash
    vi /etc/network/interfaces

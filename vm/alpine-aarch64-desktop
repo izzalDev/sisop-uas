@@ -52,7 +52,7 @@ run_vm() {
         -drive if=pflash,format=raw,file="$FIRMWARE_CODE",readonly=on \
         -drive if=pflash,format=raw,file="$VM_FIRMWARE" \
         -drive "file=$VM_DISK,format=vdi,if=virtio" \
-        -nic user \
+        -nic vmnet-shared \
         -nic vmnet-bridged,ifname=en0 \
         -device virtio-gpu-pci \
         -device qemu-xhci \
